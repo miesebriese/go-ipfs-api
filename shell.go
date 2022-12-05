@@ -21,8 +21,6 @@ import (
 	manet "github.com/multiformats/go-multiaddr/net"
 	mbase "github.com/multiformats/go-multibase"
 	tar "github.com/whyrusleeping/tar-utils"
-
-	p2pmetrics "github.com/libp2p/go-libp2p-core/metrics"
 )
 
 const (
@@ -515,20 +513,6 @@ func (s *Shell) ObjectPut(obj *IpfsObject) (string, error) {
 		Exec(context.Background(), &out)
 }
 
-func (s *Shell) PubSubSubscribe(topic string) (*PubSubSubscription, error) {
-	// connect
-	encoder, _ := mbase.EncoderByName("base64url")
-	resp, err := s.Request("pubsub/sub", encoder.Encode([]byte(topic))).Send(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	if resp.Error != nil {
-		resp.Close()
-		return nil, resp.Error
-	}
-	return newPubSubSubscription(resp.Output), nil
-}
-
 func (s *Shell) PubSubPublish(topic, data string) (err error) {
 
 	fr := files.NewReaderFile(bytes.NewReader([]byte(data)))
@@ -566,14 +550,6 @@ func (s *Shell) ObjectStat(key string) (*ObjectStats, error) {
 		return nil, err
 	}
 	return &stat, nil
-}
-
-// ObjectStat gets stats for the DAG object named by key. It returns
-// the stats of the requested Object or an error.
-func (s *Shell) StatsBW(ctx context.Context) (*p2pmetrics.Stats, error) {
-	v := &p2pmetrics.Stats{}
-	err := s.Request("stats/bw").Exec(ctx, &v)
-	return v, err
 }
 
 type SwarmStreamInfo struct {

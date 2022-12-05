@@ -363,58 +363,6 @@ func TestResolvePath(t *testing.T) {
 	is.Equal(childHash, "QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V")
 }
 
-func TestPubSub(t *testing.T) {
-	is := is.New(t)
-	s := NewShell(shellUrl)
-
-	var (
-		topic    = "test\n topic\r\t with unsafe bytes"
-		payload1 = "Hello\r\nWorld\t!"
-		payload2 = "Hallo\r\nWelt\t!!11oneonę"
-
-		sub *PubSubSubscription
-		err error
-	)
-
-	t.Log("subscribing...")
-	sub, err = s.PubSubSubscribe(topic)
-	is.Nil(err)
-	is.NotNil(sub)
-	t.Log("sub: done")
-
-	time.Sleep(10 * time.Millisecond)
-
-	t.Log("publishing...")
-	is.Nil(s.PubSubPublish(topic, payload1))
-	t.Log("pub: done")
-
-	t.Log("next()...")
-	r, err := sub.Next()
-	t.Log("next: done. ")
-
-	is.Nil(err)
-	is.NotNil(r)
-	is.Equal(r.Data, payload1)
-
-	sub2, err := s.PubSubSubscribe(topic)
-	is.Nil(err)
-	is.NotNil(sub2)
-
-	is.Nil(s.PubSubPublish(topic, payload2))
-
-	r, err = sub2.Next()
-	is.Nil(err)
-	is.NotNil(r)
-	is.Equal(r.Data, payload2)
-
-	r, err = sub.Next()
-	is.NotNil(r)
-	is.Nil(err)
-	is.Equal(r.Data, payload2)
-
-	is.Nil(sub.Cancel())
-}
-
 func TestObjectStat(t *testing.T) {
 	obj := "QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V"
 	is := is.New(t)
@@ -442,13 +390,6 @@ func TestDagPutWithOpts(t *testing.T) {
 	c, err := s.DagPutWithOpts(`{"x": "abc","y":"def"}`, options.Dag.Pin("true"))
 	is.Nil(err)
 	is.Equal(c, "bafyreidrm3r2k6vlxqp2fk47sboeycf7apddib47w7cyagrajtpaxxl2pi")
-}
-
-func TestStatsBW(t *testing.T) {
-	is := is.New(t)
-	s := NewShell(shellUrl)
-	_, err := s.StatsBW(context.Background())
-	is.Nil(err)
 }
 
 func TestSwarmPeers(t *testing.T) {
